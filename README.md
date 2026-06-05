@@ -1,5 +1,5 @@
 # Disclaimer
-This is an academic project and no use of this program is entirely at own risk.
+This is an academic project and use of this program is entirely at own risk.
 
 ## About
 This project is a web application for annotating/visualising whole slide images (WSI) in SVS format.
