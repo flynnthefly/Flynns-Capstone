@@ -1,0 +1,346 @@
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {
+  background-color: grey;
+}
+
+/* .icon.draw-tool.active {
+  border: 2px solid var(--active-color, black);
+  border-radius: 6px;
+  padding: 2px;
+} */
+
+
+:root {
+  --bg: #f6f7fb;
+  --panel: #fff;
+  --canvas: #d7d7db;
+  --ink: #2b2b2f;
+  --muted: #7b7e87;
+  --primary: #6f4cc2;
+  --primary-ink: #fff;
+  --primary-soft: #efe9ff;
+  --ring: rgba(111, 76, 194, .35);
+  --btn-radius: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+}
+
+/* Toolbar */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1001;
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  padding: .5rem;
+  background: var(--panel);
+  border-bottom: 1px solid #ececf1;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .4rem .7rem;
+  border-radius: var(--btn-radius);
+  background: var(--primary);
+  color: var(--primary-ink);
+  border: 1px solid transparent;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn.secondary {
+  background: #ede7ff;
+  color: var(--primary);
+  border-color: #e3dbff;
+}
+
+.btn.ghost {
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid #e8e8ee;
+}
+
+/* sorting button */
+.btn.active {
+  background-color: #4a90e2; /* blue highlight */
+  color: #fff;
+}
+
+.btn.asc::after {
+  content: " ↑";
+}
+
+.btn.desc::after {
+  content: " ↓";
+}
+
+.tools {
+  display: flex;
+  gap: .4rem;
+  align-items: center;
+  margin-left: .5rem;
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 1px solid #e8e8ee;
+  cursor: pointer;
+}
+
+/* active tool outline */
+.tools .icon.active {
+  outline: 2px solid var(--primary);
+  outline-offset: 0;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* eraser slider */
+#eraserSizeContainer input[type="range"]{
+  accent-color: var(--primary);
+}
+
+/* Layout */
+.wrap {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 0;
+  height: calc(100vh - 58px);
+}
+
+.sidebar {
+  background: var(--panel);
+  border-right: 1px solid #ececf1;
+  padding: .75rem .5rem;
+  overflow: auto;
+  z-index: 1000;
+}
+
+.add {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .4rem .6rem;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 12px;
+}
+
+.add:hover {
+  background: var(--primary-soft);
+}
+
+.list {
+  margin: .5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 36px 1fr 24px;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .4rem;
+  border-radius: 12px;
+}
+
+.row:hover {
+  background: #f3f4f8;
+}
+
+/* highlight selected image row */
+#imgList li.active {
+  background: #007acc22;      /* light highlight */
+  border-left: 4px solid #007acc;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #e9e2ff;
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+.tick input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+/* Stage */
+.stage {
+  background: var(--canvas);
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+/* panning cursor appearance */
+.tools .icon[data-cursor='grabbing'] {
+  cursor: grabbing;
+}
+
+.stage .placeholder {
+  font-size: 28px;
+  color: #45464e;
+  opacity: .8;
+  letter-spacing: .3px;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .35);
+  place-items: center;
+  z-index: 2000;
+}
+
+.modal.open {
+  display: grid;
+}
+
+.modal-card {
+  background: #fff;
+  padding: 16px 18px;
+  border-radius: 12px;
+  min-width: 260px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Bold\ Italic\ Underline button */
+  .fmt{display:flex; gap:.25rem}
+  .fmt .icon{width:30px}
+
+/* Undo/Redo buttons */
+#undoBtn, #redoBtn {
+  transition: opacity 0.2s ease, cursor 0.2s ease;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+#undoBtn:hover, #redoBtn:hover {
+  background-color: #f0f0f0;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .wrap {
+    grid-template-columns: 230px 1fr;
+  }
+
+  .toolbar {
+    flex-wrap: wrap;
+  }
+}
+
+
+.color-picker {
+  position: relative;
+  display: inline-block;
+}
+
+.color-picker .dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;        /* dropdown falls below icon */
+  left: 0;          /* aligned to the left of icon */
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  z-index: 100;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.color-picker:hover .dropdown-content,
+.color-picker:focus-within .dropdown-content {
+  display: flex;
+}
+
+.color-option {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid #aaa;
+}
+
+/* loading animation to spin */
+#loadingOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.8);
+  display: none;            /* hidden by default */
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 9999;
+}
+
+.spinner {
+  border: 8px solid #f3f3f3;       /* Light grey */
+  border-top: 8px solid #3498db;   /* Blue */
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

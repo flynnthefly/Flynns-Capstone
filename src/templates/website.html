@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interactive Cell Annotation</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<body>
+  <!-- hidden file input -->
+  <input id="fileInput" type="file" multiple
+         accept=".svs,.jpg,.png,.jpeg,.tif,.tiff" style="display:none" />
+
+    <!-- tools on the top -->
+    <div class="toolbar" role="toolbar" aria-label="Main toolbar">
+    <button id="btnNew" class="btn"><span>➕</span> New</button>
+    <!-- add new : id="btnExport" -->
+    <button id="btnExport" class="btn"><span>✚</span> Export <span class="caret">▾</span></button>
+   
+  <div class="dropdown">
+  <button class="btn" id="masks"><span>🗂️</span>Masks<span class="caret">▾</span></button>
+  <div class="dropdown-content" id="maskList"></div>
+  </div>
+
+<div class="dropdown color-picker">
+  <div class="icon" title="Color" id="colorBtnr" style="background-color: red;"></div>
+  <div class="dropdown-content colors" id="colorOptions">
+    <!-- JS will render fixed default labeled colors here (no free picker) -->
+  </div>
+</div>
+
+    <div class="tools" aria-label="Drawing tools">
+      <div id="toolPencil" class="icon draw-tool" title="Pencil"><i class="fa-solid fa-pen"></i></div>
+      <div id="toolBrush" class="icon draw-tool" title="Brush"><i class="fa-solid fa-paintbrush"></i></div>
+      <div id="toolCircle" class="icon draw-tool" title="Circle"><i class="fa-solid fa-circle"></i></div>
+      <div id="toolSquare" class="icon draw-tool" title="Square"><i class="fa-solid fa-square"></i></div>
+      <div id="toolEraser" class="icon" title="Eraser"><i class="fa-solid fa-eraser"></i></div>
+      <div id="toolPan" class="icon" title="Pan"><i class="fa-solid fa-hand"></i></div>
+      <div id="toolSelect" class="icon" title="Select"><i class="fa-solid fa-arrow-pointer"></i></div>
+      <div class="icon" title="Cut">✂️</div>
+      <div id="eraserSizeContainer" style="display:none; align-items:center; gap:6px; margin-left:.5rem;">
+        <input id="eraserSize" type="range" min="10" max="100" value="50" />
+        <span id="eraserSizeValue">50</span>
+      </div>
+      <div class="sep"></div>
+      <div id="zoomOutBtn" class="icon" title="Zoom out">−</div>
+      <div id="zoomPct" style="font-weight:600;color:var(--muted)">100%</div>
+      <div id="zoomInBtn" class="icon" title="Zoom in">＋</div>
+      <div class="sep"></div>
+      <div id="undoBtn" class="icon" title="Undo">↶</div>
+      <div id="redoBtn" class="icon" title="Redo">↷</div>
+      <div class="sep"></div>
+    </div>
+  </div>
+
+  <!-- layout -->
+  <div class="wrap">
+    <aside class="sidebar">
+      <button id="sortNew" class="btn secondary" type="button">↑↓N</button>
+      <button id="sortName" class="btn secondary" type="button">↑↓A</button>
+      <button id="selectAll" class="btn secondary" type="button">SelectAll</button>
+      <ul class="list" id="imgList"></ul>
+    </aside>
+    <main class="stage" role="main" aria-label="Canvas area">
+      <div class="placeholder">Photo</div>
+    </main>
+  </div>
+
+  <!-- format picker modal -->
+  <div id="fmtModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <div style="font-weight:700; margin-bottom:10px;">Convert .svs to:</div>
+      <div class="modal-actions">
+        <button id="toPng" class="btn secondary" type="button">PNG</button>
+        <button id="toJpg" class="btn secondary" type="button">JPG</button>
+        <button id="toTiff" class="btn secondary" type="button">TIFF</button>
+        <button id="cancelFmt" class="btn ghost" type="button" style="margin-left:auto">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- patches selection modal -->
+  <div id="patchesModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <div style="font-weight:700; margin-bottom:10px;">Sliding to patches</div>
+      <div class="modal-actions">
+        <form id="patchesForm" class="modal-body" novalidate>
+          <label for="patchName" class="label">Name</label><br><br>
+          <input id="patchName" name="patchName" type="text" class="input" placeholder="new_image" required minlength="1" maxlength="64" /><br><br>
+          
+          <label for="patchCount" class="label" style="margin-top:10px;">Number of patches</label><br><br>
+          <input id="patchCount" name="patchCount" type="number" class="input" placeholder="50" required min="1" step="1" /><br><br>
+
+          <label for="patchLevel" class="label" style="margin-top:10px;">Resolution(1/2 faster)</label><br><br>
+          <input id="patchLevel" name="patchLevel" type="number" class="input" placeholder="1" required min="1" step="0.1" /><br><br>
+
+        <div class="modal-actions">
+          <button id="submitPatches" class="btn secondary" type="button">Confirm</button>
+          <button id="cancelPatches" class="btn ghost" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- new function -->
+  <div id="exportModal" class="modal" aria-hidden="true">
+  <div class="modal-card">
+    <div style="font-weight:700; margin-bottom:10px;">Export selected as:</div>
+    <div class="modal-actions">
+      <button id="expKeep" class="btn secondary" type="button">Keep</button>
+      <button id="expPNG"  class="btn secondary" type="button">PNG</button>
+      <button id="expJPG"  class="btn secondary" type="button">JPG</button>
+       <!-- new .tiff option -->
+      <button id="expTIFF" class="btn secondary" type="button">TIFF</button>
+      <button id="expCancel" class="btn ghost" type="button" style="margin-left:auto">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- loading animation -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <p>Patching in progress...</p>
+</div>
+
+<!-- Color Picker Modal -->
+<div id="colorModal" class="modal" aria-hidden="true">
+  <div class="modal-card">
+    <div style="font-weight:700;margin-bottom:8px;">Pick a color</div>
+
+    <div id="pickerArea" style="margin-bottom:10px;">
+      <canvas id="svCanvas" width="260" height="160" style="display:block;border-radius:10px;border:1px solid #e0e0e6"></canvas>
+      <canvas id="hueCanvas" width="260" height="16"  style="display:block;margin-top:10px;border-radius:999px;border:1px solid #e0e0e6"></canvas>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+      <input id="uiHex" type="text" value="#9999ff"
+             style="width:110px;padding:6px 8px;border:1px solid #e8e8ee;border-radius:8px;">
+      <div id="uiPreview" style="width:24px;height:24px;border-radius:6px;border:1px solid #aaa;"></div>
+
+      <div class="modal-actions" style="margin-left:auto;">
+        <button id="colorCancel" class="btn ghost" type="button">Cancel</button>
+        <button id="colorUse" class="btn" type="button">Use color</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/clipper-lib@6.4.2/clipper.js"></script>
+
+<script src="{{ url_for('static', filename='js/canvas.js') }}"></script>
+<script src="{{ url_for('static', filename='js/drawing-tool-manager.js') }}"></script>
+<script src="{{ url_for('static', filename='js/polygon.js') }}"></script>
+<script src="{{ url_for('static', filename='js/undo-redo.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/brush.js') }}"></script>
+<script src="{{ url_for('static', filename='js/free.js') }}"></script>
+<script src="{{ url_for('static', filename='js/circle.js') }}"></script>
+<script src="{{ url_for('static', filename='js/square.js') }}"></script>
+<script src="{{ url_for('static', filename='js/eraser.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pan.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>
