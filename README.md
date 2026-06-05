@@ -1,5 +1,5 @@
 # Disclaimer
-This is an academic project and use of this program is entirely at own risk.
+This is an academic project and use of this program is entirely at the user's own risk.
 
 ## About
 This project is a web application for annotating/visualising whole slide images (WSI) in SVS format.
@@ -16,9 +16,10 @@ This application is designed to be entirely local and user controlled. It is not
 - Masks window to add cell categories and filter masks to show. Select the current mask to annotate on next to the tools.
 
 ## Running
-Ensure that you are under the Python environment, download the python here: https://www.python.org/downloads/release/python-3124/
+Ensure that you are under the Python environment, available here: https://www.python.org/downloads/release/python-3124/
 
-For Windows: double click the `open` file (with the .bat extension) in root directory
+For Windows: double click the `open` file (with the .bat extension) in root directory.
+
 For Mac/Linux: type `./run.sh`. If permissions are denied run `chmod +x ./run.sh` and then run the first command again.
 
 Or go to the /src/, and run the command: python app.py
